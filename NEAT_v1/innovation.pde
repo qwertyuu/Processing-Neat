@@ -11,11 +11,11 @@ static class innovation{
   public static int next(){
     return ++number;
   }
-  public static int trouver_gene(int input_node_index, int output_node_index){
+  public static int trouver_gene(node input_node, node output_node){
     for(innovable innovation : innovations_of_current_generation){
       if(innovation instanceof gene){
         gene innovation_gene = (gene)innovation;
-        if(innovation_gene.input_node_index == input_node_index && innovation_gene.output_node_index == output_node_index){
+        if(innovation_gene.input_node_object.innovation == input_node.innovation && innovation_gene.output_node_object.innovation == output_node.innovation){
           //si oui, on veut son # d'innovation
           return innovation.innovation;
         }

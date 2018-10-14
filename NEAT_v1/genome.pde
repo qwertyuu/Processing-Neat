@@ -70,22 +70,22 @@ class genome{
     for(innovable connexion_gene : this.genetique){
       if(connexion_gene instanceof gene){
         gene connexion = (gene)connexion_gene;
-        println(connexion.input_node_index, connexion.output_node_index);
+        println(connexion.input_node_object.innovation, connexion.output_node_object.innovation);
       }
     }
   }
   
-  public boolean check_if_nodes_already_connected(int index_node_1, int index_node_2){
+  public boolean check_if_nodes_already_connected(node node_1, node node_2){
     boolean do_debug = false;
     for(innovable connexion_gene : this.genetique){
       if(connexion_gene instanceof gene){
         gene connexion = (gene)connexion_gene;
         if(do_debug){
-          println(connexion.input_node_index, connexion.output_node_index);
+          println(connexion.input_node_object.innovation, connexion.output_node_object.innovation);
         }
         if(
-          (connexion.input_node_index == index_node_1 && connexion.output_node_index == index_node_2) ||
-          (connexion.input_node_index == index_node_2 && connexion.output_node_index == index_node_1)
+          (connexion.input_node_object.innovation == node_1.innovation && connexion.output_node_object.innovation == node_2.innovation) ||
+          (connexion.input_node_object.innovation == node_2.innovation && connexion.output_node_object.innovation == node_1.innovation)
         ){
           if(do_debug){
             println("ALREADY EXISTS");

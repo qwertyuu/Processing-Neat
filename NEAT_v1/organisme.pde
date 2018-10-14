@@ -34,7 +34,7 @@ class organisme implements Comparable<organisme>{
     }
     for(gene connexion : this.phenotype){
       if (debug) {
-        println(connexion.input_node_index + " (" + connexion.input_node_object.innovation + ") " + "->" + connexion.output_node_index + " (" + connexion.output_node_object.innovation + ")");
+        println((connexion.enabled ? "I" : "O") + " " + connexion.input_node_object.index + " -> " + connexion.weight + " -> " + connexion.output_node_object.index);
       }
       
       connexion.output_node_object.value += connexion.input_node_object.value * connexion.weight;
@@ -49,21 +49,21 @@ class organisme implements Comparable<organisme>{
     HashMap<Integer,Integer> lowestNodeIndexPerType = new HashMap<Integer,Integer>();
     for(gene connexion : this.phenotype){
       Integer highestInputIndex = highestNodeIndexPerType.get(connexion.input_node_object.node_type);
-      if (highestInputIndex == null || highestInputIndex < connexion.input_node_index) {
-        highestNodeIndexPerType.put(connexion.input_node_object.node_type, connexion.input_node_index);
+      if (highestInputIndex == null || highestInputIndex < connexion.input_node_object.index) {
+        highestNodeIndexPerType.put(connexion.input_node_object.node_type, connexion.input_node_object.index);
       }
       Integer lowestInputIndex = lowestNodeIndexPerType.get(connexion.input_node_object.node_type);
-      if (lowestInputIndex == null || lowestInputIndex > connexion.input_node_index) {
-        lowestNodeIndexPerType.put(connexion.input_node_object.node_type, connexion.input_node_index);
+      if (lowestInputIndex == null || lowestInputIndex > connexion.input_node_object.index) {
+        lowestNodeIndexPerType.put(connexion.input_node_object.node_type, connexion.input_node_object.index);
       }
       
       Integer highestOutputIndex = highestNodeIndexPerType.get(connexion.output_node_object.node_type);
-      if (highestOutputIndex == null || highestOutputIndex < connexion.output_node_index) {
-        highestNodeIndexPerType.put(connexion.output_node_object.node_type, connexion.output_node_index);
+      if (highestOutputIndex == null || highestOutputIndex < connexion.output_node_object.index) {
+        highestNodeIndexPerType.put(connexion.output_node_object.node_type, connexion.output_node_object.index);
       }
       Integer lowestOutputIndex = lowestNodeIndexPerType.get(connexion.output_node_object.node_type);
-      if (lowestOutputIndex == null || lowestOutputIndex > connexion.output_node_index) {
-        lowestNodeIndexPerType.put(connexion.output_node_object.node_type, connexion.output_node_index);
+      if (lowestOutputIndex == null || lowestOutputIndex > connexion.output_node_object.index) {
+        lowestNodeIndexPerType.put(connexion.output_node_object.node_type, connexion.output_node_object.index);
       }
     }
     for(gene connexion : this.phenotype){
@@ -135,7 +135,7 @@ class organisme implements Comparable<organisme>{
       else{
         gene element_connexion = (gene)element_genome;
         if(output){
-          println(element_connexion.input_node_index, "->", element_connexion.output_node_index);
+          println(element_connexion.input_node_object.innovation, "->", element_connexion.output_node_object.innovation);
         }
         if(element_connexion.enabled){
           mes_connexions.add(element_connexion);
@@ -150,10 +150,10 @@ class organisme implements Comparable<organisme>{
       node node_a_connecter = node_queue.remove();
       //Trouve les liens vers autre nodes qui sont actifs
       for(gene connexion : mes_connexions){
-        if(connexion.input_node_index == node_a_connecter.index){
+        if(connexion.input_node_object.innovation == node_a_connecter.innovation){
           boolean a = false;
           for(node node_output_recherche : this.all_nodes){
-            if(node_output_recherche.index == connexion.output_node_index){
+            if(node_output_recherche.innovation == connexion.output_node_object.innovation){
               if(!nodes_deja_connectes.contains(node_output_recherche)){
                 //Ajoute la node out a la queue de node si elle n'y est pas déjà ou n'y a pas déjà été
                 node_queue.add(node_output_recherche);
@@ -169,9 +169,9 @@ class organisme implements Comparable<organisme>{
               println(node_output_recherche.index + " I:" + node_output_recherche.innovation);
             }
             for(gene connexion_debug : mes_connexions){
-              println("connexion: " + connexion_debug.input_node_index + "->" + connexion_debug.output_node_index + " I:" + connexion_debug.innovation);
+              println("connexion: " + connexion_debug.input_node_object.innovation + "->" + connexion_debug.output_node_object.innovation + " I:" + connexion_debug.innovation);
             }
-            println(connexion.output_node_index);
+            println(connexion.output_node_object.innovation);
           }
           connexion.input_node_object = node_a_connecter;
           //Ajoute les liens à la liste de liens en ordre
@@ -462,7 +462,7 @@ class organisme implements Comparable<organisme>{
       }while(
         (
           !isValidLink(node_0, node_1) || 
-          nouveau_genome.check_if_nodes_already_connected(node_0.index, node_1.index) 
+          nouveau_genome.check_if_nodes_already_connected(node_0, node_1) 
         ) && essais_while < 100);
       if(essais_while == 100){
         //Pas de nodes non connectés
@@ -471,10 +471,10 @@ class organisme implements Comparable<organisme>{
       if(!probleme){
         node premiere_node_a_connecter = node_0;
         node seconde_node_a_connecter = node_1;
-        gene nouvelle_connexion = new gene(premiere_node_a_connecter.index, seconde_node_a_connecter.index, random(-2, 2), true);
+        gene nouvelle_connexion = new gene(premiere_node_a_connecter, seconde_node_a_connecter, random(-2, 2), true);
         
         //on vérifie si cette combinaison de node-in et node-out a déjà été faite auparavant
-        int innovation_number = innovation.trouver_gene(premiere_node_a_connecter.index, seconde_node_a_connecter.index);
+        int innovation_number = innovation.trouver_gene(premiere_node_a_connecter, seconde_node_a_connecter);
         
         if(innovation_number == -1){
           innovation_number = innovation.next();
@@ -510,8 +510,8 @@ class organisme implements Comparable<organisme>{
         nouvelle_node.innovation = innovation_number_node;
         nouveau_genome.add_gene(nouvelle_node);
         
-        gene nouvelle_connexion_ancien_a_nouveau = new gene(gene_a_scinder.input_node_index, nouvelle_node.index, 1, true);
-        int innovation_number_gene_ancien_a_nouveau = innovation.trouver_gene(nouvelle_connexion_ancien_a_nouveau.input_node_index, nouvelle_connexion_ancien_a_nouveau.output_node_index);
+        gene nouvelle_connexion_ancien_a_nouveau = new gene(gene_a_scinder.input_node_object, nouvelle_node, 1, true);
+        int innovation_number_gene_ancien_a_nouveau = innovation.trouver_gene(nouvelle_connexion_ancien_a_nouveau.input_node_object, nouvelle_connexion_ancien_a_nouveau.output_node_object);
         if(innovation_number_gene_ancien_a_nouveau == -1){
           innovation_number_gene_ancien_a_nouveau = innovation.next();
           innovation.innovations_of_current_generation.add(nouvelle_connexion_ancien_a_nouveau);
@@ -520,8 +520,8 @@ class organisme implements Comparable<organisme>{
         nouveau_genome.add_gene(nouvelle_connexion_ancien_a_nouveau);
         
         
-        gene nouvelle_connexion_nouveau_a_ancien = new gene(nouvelle_node.index, gene_a_scinder.output_node_index, gene_a_scinder.weight, true);
-        int innovation_number_gene_nouveau_a_ancien = innovation.trouver_gene(nouvelle_connexion_nouveau_a_ancien.input_node_index, nouvelle_connexion_nouveau_a_ancien.output_node_index);
+        gene nouvelle_connexion_nouveau_a_ancien = new gene(nouvelle_node, gene_a_scinder.output_node_object, gene_a_scinder.weight, true);
+        int innovation_number_gene_nouveau_a_ancien = innovation.trouver_gene(nouvelle_connexion_nouveau_a_ancien.input_node_object, nouvelle_connexion_nouveau_a_ancien.output_node_object);
         if(innovation_number_gene_nouveau_a_ancien == -1){
           innovation_number_gene_nouveau_a_ancien = innovation.next();
           innovation.innovations_of_current_generation.add(nouvelle_connexion_nouveau_a_ancien);
