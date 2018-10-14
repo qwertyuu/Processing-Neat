@@ -20,6 +20,53 @@ class organisme implements Comparable<organisme>{
     this.genome = new genome(nb_input_nodes, nb_output_nodes, false);
   }
   
+  private node[] findNodes(node input)
+  {
+    ArrayList<node> allConnectedNodes = new ArrayList<node>();
+    for(gene connexion : this.phenotype){
+      if (connexion.input_node_object.innovation == input.innovation){
+        allConnectedNodes.add(connexion.output_node_object);
+      }
+    }
+    return allConnectedNodes.toArray(new node[allConnectedNodes.size()]);
+  }
+  
+  private gene[] findGenes(node input)
+  {
+    ArrayList<gene> allConnections = new ArrayList<gene>();
+    for(gene connexion : this.phenotype){
+      if (connexion.input_node_object.innovation == input.innovation){
+        allConnections.add(connexion);
+      }
+    }
+    return allConnections.toArray(new gene[allConnections.size()]);
+  }
+  
+  private void visit(node n, ArrayList<node> L) {
+    if (n.has_triggered) {
+      return;
+    }
+    if (n.temporary_mark) {
+      throw new RuntimeException(Integer.toString(n.innovation));
+    }
+    n.temporary_mark = true;
+    for(node relatedNode : this.findNodes(n)){
+      this.visit(relatedNode, L);
+    }
+    n.has_triggered = true;
+    L.add(0, n);
+  }
+  
+  private node firstNotTriggered()
+  {
+    for(node node : this.all_nodes){
+      if (!node.has_triggered){
+        return node;
+      }
+    }
+    return null;
+  }
+  
   public void propagate(Boolean debug){
     //suppose que le phenotype est généré
     for(node node_to_reset : this.all_nodes){
@@ -27,17 +74,28 @@ class organisme implements Comparable<organisme>{
         node_to_reset.value = 0;
       }
       node_to_reset.has_triggered = false;
-      
+      node_to_reset.temporary_mark = false;
     }
     if(this.phenotype.size() == 0){
       return;
     }
-    for(gene connexion : this.phenotype){
-      if (debug) {
-        println((connexion.enabled ? "I" : "O") + " " + connexion.input_node_object.index + " -> " + connexion.weight + " -> " + connexion.output_node_object.index);
+    ArrayList<node> topologicalOrderNodes = new ArrayList<node>();
+    node firstNotTriggered = null;
+    while((firstNotTriggered = this.firstNotTriggered()) != null)
+    {
+      this.visit(firstNotTriggered, topologicalOrderNodes);
+    }
+    
+    for(node node : topologicalOrderNodes){
+      gene[] genes = this.findGenes(node);
+      for (gene connexion : genes) {
+        connexion.output_node_object.value += node.value * connexion.weight;
+        if (debug) {
+          println(connexion.input_node_object.index + " -> " + connexion.weight + " -> " + connexion.output_node_object.index);
+          //println("New value for node " + connexion.output_node_object.index + " is " + connexion.output_node_object.value);
+        }
       }
       
-      connexion.output_node_object.value += connexion.input_node_object.value * connexion.weight;
     }
   }
   
@@ -539,9 +597,10 @@ class organisme implements Comparable<organisme>{
   {
     if (node_0.node_type == 3 && node_1.node_type == 3) {
       //CAS: La node input est H et la node output est H, regarder si l'index de l'output est plus grande que celle de l'input
-      return node_1.index > node_0.index;
+      return node_1.innovation > node_0.innovation;
     }
-    if (node_0.node_type == 1 && node_1.node_type == 1) {
+    // We don't want to propagate TO an input node
+    if (node_1.node_type == 1) {
       return false;
     }
     return true;

@@ -9,7 +9,7 @@ void setup(){
   fullScreen(1);
   frameRate(100);
   em = new evolution_manager();
-  //randomSeed(12);
+  randomSeed(12);
 }
 
 void draw(){

@@ -3,6 +3,7 @@ class node extends innovable{
  public int index;
  public float value;
  public boolean has_triggered;
+ public boolean temporary_mark;
  public int x;
  public int y;
  
@@ -11,6 +12,7 @@ class node extends innovable{
    this.index = index;
    this.value = 0;
    this.has_triggered = false;
+   this.temporary_mark = false;
    this.draw_width = 30;
    this.draw_height = 50;
    this.x = -1;
@@ -22,6 +24,7 @@ class node extends innovable{
     node toClone = new node(node_type, index);
     toClone.innovation = this.innovation;
     toClone.has_triggered = this.has_triggered;
+    toClone.temporary_mark = this.temporary_mark;
     toClone.value = this.value;
     return toClone;
   }

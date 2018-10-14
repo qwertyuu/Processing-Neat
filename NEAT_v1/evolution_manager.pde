@@ -62,6 +62,7 @@ class evolution_manager{
     
     float highest_fitness = 0;
     organisme meilleur_ami = null;
+    ArrayList<organisme> corruptOrganisms = new ArrayList<organisme>();
     for(organisme ami : this.generation_manager.population){
       //exporter le neural net
       ami.compute_phenotype(false);
@@ -73,7 +74,12 @@ class evolution_manager{
           input_node.value = input[truth_line_index][input_node_index];
           input_node_index++;
         }
-        ami.propagate(false);
+        try {
+          ami.propagate(false);
+        } catch(RuntimeException x) {
+          corruptOrganisms.add(ami);
+          continue;
+        }
         int highest_index = 0;
         double highest_sigmoid = 0;
         for(int i = 0; i < ami.outputs.size(); i++){
@@ -87,7 +93,7 @@ class evolution_manager{
         if(output[truth_line_index][highest_index] == 1){
           ami.fitness+=1;
         }
-        //println("raw:" + ami.outputs.get(0).value + " on a: " + sigmoid(ami.outputs.get(0).value) + " et on veut: " + output[truth_line_index]);
+        //println("raw:" + ami.outputs.get(0).value + " on a: " + sigmoid(ami.get(0).value) + " et on veut: " + output[truth_line_index]);
       }
       if(ami.fitness > highest_fitness){
         highest_fitness = ami.fitness;
@@ -96,8 +102,39 @@ class evolution_manager{
         meilleur_ami.compute_phenotype(false);
       }
     }
+    if(corruptOrganisms.size() > 0) {
+      println("Removed " + corruptOrganisms.size() + " corrupt organisms");
+      this.generation_manager.population.remove(corruptOrganisms);
+    }
     if(bff == null || meilleur_ami != null && bff.fitness < meilleur_ami.fitness) {
       bff = meilleur_ami;
+      for(int truth_line_index = 0; truth_line_index < input.length; truth_line_index++){
+        int input_node_index = 0;
+        
+        for(node input_node : bff.inputs){
+          input_node.value = input[truth_line_index][input_node_index];
+          print(input_node.value + " ");
+          input_node_index++;
+        }
+        bff.propagate(false);
+        int highest_index = 0;
+        double highest_sigmoid = 0;
+        for(int i = 0; i < bff.outputs.size(); i++){
+          double current_sigmoid = sigmoid(bff.outputs.get(i).value);
+          if (current_sigmoid > highest_sigmoid){
+            highest_index = i;
+            highest_sigmoid = current_sigmoid;
+          }
+        }
+        int real_answer = 0;
+        for(int i = 0; i < output[truth_line_index].length; i++){
+          if (output[truth_line_index][i] == 1) {
+            real_answer = i;
+            break;
+          }
+        }
+        println(highest_index + " " + real_answer);
+      }
     }
     if(bff != null){
         background(255);
@@ -108,7 +145,6 @@ class evolution_manager{
     generation_manager.compute_new_generation();
     if(ever_best < highest_fitness){
       ever_best = highest_fitness;
-      meilleur_ami.propagate(true);
       println( round(highest_fitness) + " " + round(ever_best));
     }
     
