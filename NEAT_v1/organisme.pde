@@ -20,6 +20,11 @@ class organisme implements Comparable<organisme>{
     this.genome = new genome(nb_input_nodes, nb_output_nodes, false);
   }
   
+  public organisme(genome genome){
+    this.fitness = 0f;
+    this.genome = genome;
+  }
+  
   private node[] findNodes(node input)
   {
     ArrayList<node> allConnectedNodes = new ArrayList<node>();
@@ -56,15 +61,30 @@ class organisme implements Comparable<organisme>{
     n.has_triggered = true;
     L.add(0, n);
   }
-  
-  private node firstNotTriggered()
-  {
-    for(node node : this.all_nodes){
-      if (!node.has_triggered){
-        return node;
+
+  public void setInputs(float[] values) {
+    if (values.length != this.genome.nb_input_nodes) {
+      throw new RuntimeException("input size mistmatch");
+    }
+    
+    int input_node_index = 0;
+    for(node input_node : this.inputs){
+      input_node.value = values[input_node_index];
+      input_node_index++;
+    }
+  }
+
+  public int getHighestValueIndex() {
+    int highest_index = 0;
+    double highest_value = 0;
+    for(int i = 0; i < this.outputs.size(); i++){
+      double current_value = this.outputs.get(i).value;
+      if (current_value > highest_value){
+        highest_index = i;
+        highest_value = current_value;
       }
     }
-    return null;
+    return highest_index;
   }
   
   public void propagate(Boolean debug){
@@ -80,13 +100,13 @@ class organisme implements Comparable<organisme>{
       return;
     }
     ArrayList<node> topologicalOrderNodes = new ArrayList<node>();
-    node firstNotTriggered = null;
-    while((firstNotTriggered = this.firstNotTriggered()) != null)
-    {
-      this.visit(firstNotTriggered, topologicalOrderNodes);
+    for(node n : this.all_nodes) {
+      this.visit(n, topologicalOrderNodes);
     }
     
+    int index = 0;
     for(node node : topologicalOrderNodes){
+      node.topological_sort_value = index++;
       gene[] genes = this.findGenes(node);
       for (gene connexion : genes) {
         connexion.output_node_object.value += node.value * connexion.weight;
@@ -240,11 +260,6 @@ class organisme implements Comparable<organisme>{
       mes_connexions.removeAll(connexions_a_supprimer);
       connexions_a_supprimer.clear();
     }
-  }
-  
-  public organisme(genome genome){
-    this.fitness = 0f;
-    this.genome = genome;
   }
   
   @Override

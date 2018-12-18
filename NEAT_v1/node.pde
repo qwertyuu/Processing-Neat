@@ -2,6 +2,7 @@ class node extends innovable{
  public int node_type; //1 = input, 2 = output, 3 = hidden
  public int index;
  public float value;
+ public int topological_sort_value;
  public boolean has_triggered;
  public boolean temporary_mark;
  public int x;
@@ -17,6 +18,7 @@ class node extends innovable{
    this.draw_height = 50;
    this.x = -1;
    this.y = -1;
+   this.topological_sort_value = -1;
  }
  
   @Override
@@ -45,7 +47,7 @@ class node extends innovable{
     else{
       lettre = "H";
     }
-    s += lettre + ":" + this.index;
+    s += lettre + ":" + this.index + " " + this.topological_sort_value;
     text(s, x + 2, y + 2, this.draw_width, this.draw_height);
   }
   
@@ -65,7 +67,7 @@ class node extends innovable{
       lettre = "H";
     }
     fill(0, 102, 153);
-    text(lettre + this.index, this.x - 10, this.y - 10, 20, 20);
+    text("" + this.innovation, this.x - 10, this.y - 10, 20, 20);
   }
   
 }

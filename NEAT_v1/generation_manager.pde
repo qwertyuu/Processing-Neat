@@ -54,7 +54,7 @@ class generation_manager{
         koth = opponent;
       }
     }
-    nouvelle_generation.add(koth);
+    //nouvelle_generation.add(koth);
     while(nouvelle_generation.size() < this.organismes_par_generation){
       copie_de_population = new ArrayList(population);
       organisme[] parents = new organisme[2];

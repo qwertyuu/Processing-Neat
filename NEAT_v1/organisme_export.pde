@@ -17,6 +17,7 @@ void organisme_export(organisme o, String file) {
     node_json.setString("type", lettre);
     node_json.setInt("innovation_number", n.innovation);
     node_json.setInt("index", n.index);
+    node_json.setInt("topological_sort_value", n.topological_sort_value);
     nodes.append(node_json);
   }
   JSONArray links = new JSONArray();
