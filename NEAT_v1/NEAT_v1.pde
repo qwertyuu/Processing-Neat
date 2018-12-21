@@ -8,7 +8,7 @@ evolution_manager em;
 void setup(){
   //size(800, 1000);
   fullScreen(1);
-  frameRate(60);
+  frameRate(2);
   em = new evolution_manager();
   thread("tick");
   randomSeed(12);

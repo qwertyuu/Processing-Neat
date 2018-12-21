@@ -14,6 +14,7 @@ class tictactoe {
     if (this.board[col][row] != 0) {
       return false;
     }
+    moveCount++;
     this.board[col][row] = player;
     for(int i = 0; i < size; i++){
         if(board[col][i] != player)
@@ -51,7 +52,8 @@ class tictactoe {
             if(board[i][(size-1)-i] != player)
                 break;
             if(i == size-1){
-                //report win for s
+              whoWon = player;
+              return true;
             }
         }
     }

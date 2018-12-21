@@ -10,9 +10,9 @@ class organisme implements Comparable<organisme>{
   public ArrayList<node> all_nodes;
   float weight_mutation_chance = 0.015;
   float add_connection_mutation_chance = 0.005;
-  float add_node_mutation_chance = 0.0001;
+  float add_node_mutation_chance = 0.0005;
   float disabled_if_any_chance = 0.5;
-  float enabled_if_any_chance = 2;  
+  float enabled_if_any_chance = 0.5;  
   public specie espece_parent;
   public float adjusted_fitness;
   public organisme(int nb_input_nodes, int nb_output_nodes){

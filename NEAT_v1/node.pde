@@ -28,6 +28,9 @@ class node extends innovable{
     toClone.has_triggered = this.has_triggered;
     toClone.temporary_mark = this.temporary_mark;
     toClone.value = this.value;
+    toClone.topological_sort_value = this.topological_sort_value;
+    toClone.x = this.x;
+    toClone.y = this.y;
     return toClone;
   }
   
